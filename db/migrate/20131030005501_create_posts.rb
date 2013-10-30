@@ -4,10 +4,6 @@ class CreatePosts < ActiveRecord::Migration
       t.belongs_to :member
       t.text :contents
       t.timestamps
-<<<<<<< HEAD
-  
-=======
     end
->>>>>>> master
   end
 end
