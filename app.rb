@@ -4,8 +4,7 @@ require_relative './app/models/member'
 require_relative './app/models/post'
 
 
-ActiveRecord::Base.establish_connection(adapter: 'postgresql',
-                                        database: 'shamango')
+ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango')
 
 get '/' do
   erb :index  
