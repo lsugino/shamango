@@ -6,20 +6,30 @@ require_relative './app/models/post'
 
 ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango')
 
+enable :sessions
+
 get '/' do
-  p "hello"
-  erb :login
+  if session[:logged_in_user_id]
+    erb :index
+  else
+    erb :login
+  end
 end
 
 post'/' do
   @member = Member.find_by email: params[:email]
-  p params[:password]
-  p @member.password
-  p @member.password == params[:password]
+  if @member.password == params[:password]
+    session[:logged_in_user_id] = @member.id
+    redirect '/'
+  else
+    @password_wrong = true
+    redirect '/'
+  end
 end
 
 get '/home' do
-  erb :home
+  @foo = "foo"
+  erb :index
 end
 
 get '/new' do
@@ -34,4 +44,9 @@ post '/new' do
   @member.password = params[:password]
   @member.save 
   redirect '/home'
+end
+
+get '/logout' do
+  session.clear
+  erb :logout
 end
