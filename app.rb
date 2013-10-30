@@ -7,19 +7,31 @@ require_relative './app/models/post'
 ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango')
 
 get '/' do
-  erb :index  
+  p "hello"
+  erb :login
 end
 
-get '/create' do
+post'/' do
+  @member = Member.find_by email: params[:email]
+  p params[:password]
+  p @member.password
+  p @member.password == params[:password]
+end
+
+get '/home' do
+  erb :home
+end
+
+get '/new' do
   erb :create_user
 end
 
-post '/create_user' do
-  member = Member.new
-  member.first_name = params[:first_name]
-  member.last_name = params[:last_name]
-  member.email = params[:email]
-  member.password = params[:password]
-  member.save 
-  redirect '/'
+post '/new' do
+  @member = Member.new
+  @member.first_name = params[:first_name]
+  @member.last_name = params[:last_name]
+  @member.email = params[:email]
+  @member.password = params[:password]
+  @member.save 
+  redirect '/home'
 end
