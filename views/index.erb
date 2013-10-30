@@ -1,5 +1,5 @@
 <p>Shamango in the house</p>
 
 <% Post.all.each do |p| %>
-	 <p><%="#{p.member_id}: #{p.contents} at #{p.timestamps}"%> </p>
+	 <p><%="#{p.member_id}: #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}"%> </p>
 	 <% end %> 
