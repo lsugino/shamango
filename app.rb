@@ -16,6 +16,11 @@ get '/create' do
 end
 
 post '/create_user' do
-  member = Member.create 
-  p params
+  member = Member.new
+  member.first_name = params[:first_name]
+  member.last_name = params[:last_name]
+  member.email = params[:email]
+  member.password = params[:password]
+  member.save 
+  redirect '/'
 end
