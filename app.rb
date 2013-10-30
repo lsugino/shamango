@@ -1,10 +1,11 @@
 require 'sinatra'
 require 'active_record'
-require_relative './app/models/elephant'
+require_relative './app/models/member'
+
 
 ActiveRecord::Base.establish_connection(adapter: 'postgresql',
-                                        database: 'sinatra_skeleton_dev')
+                                        database: 'shamango')
 
 get '/' do
-  "Hello World!"
+   erb :index  
 end
