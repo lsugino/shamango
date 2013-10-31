@@ -1,4 +1,4 @@
-<%="Please Reenter Password" if @password_wrong %>
+<%="Please Reenter Password" if session[:password_wrong] %>
 <p>Please login or Create User</p>
 <form name="input" action="/" method="post">
 Email: <input type="text" name="email">

@@ -22,19 +22,23 @@ post'/' do
     session[:logged_in_user_id] = @member.id
     redirect '/'
   else
-    @password_wrong = true
+    session[:password_wrong] = true
     redirect '/'
   end
-end
-
-get '/home' do
-  @foo = "foo"
-  erb :index
 end
 
 get '/new' do
   erb :create_user
 end
+
+get '/member' do
+  @member = Member.find(session[:logged_in_user_id])
+
+end
+
+post '/member'
+end
+
 
 post '/new' do
   @member = Member.new
@@ -43,7 +47,8 @@ post '/new' do
   @member.email = params[:email]
   @member.password = params[:password]
   @member.save 
-  redirect '/home'
+  session[:logged_in_user_id] = @member.id
+  redirect '/'
 end
 
 get '/logout' do
