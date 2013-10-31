@@ -1,0 +1,14 @@
+<%=@member.first_name%>
+<% if @member.id == session[:logged_in_user_id] %>
+  <form name="input" action="/:member" method="post">
+    <textarea type = "text" name = "contents" placeholder = "Write a new post!"></textarea>  
+    <input type="submit" value="Submit">
+  </form>
+<%end%>
+
+
+<% Post.where(member_id: @member.id).reverse.each do |p| %>
+   <p><%="#{p.member.first_name}: #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
+<% end %> 
+
+
