@@ -16,7 +16,7 @@ get '/' do
   end
 end
 
-post'/' do
+post '/' do
   @member = Member.find_by email: params[:email]
   if @member.password == params[:password]
     session[:logged_in_user_id] = @member.id
@@ -31,6 +31,20 @@ get '/new' do
   erb :create_user
 end
 
+post '/new' do
+  p params
+  @member = Member.new
+  @member.first_name = params[:first_name]
+  @member.last_name = params[:last_name]
+  @member.email = params[:email]
+  @member.password = params[:password]
+  @member.save 
+  p @member
+  session[:logged_in_user_id] = @member.id
+  p session
+  redirect '/'
+end
+
 get '/logout' do
   session.clear
   erb :logout
@@ -42,21 +56,11 @@ get '/:member' do
 end
 
 post '/:member' do
-  @member = Member.find(session[:logged_in_user_id])
+  @member = Member.find_by_id(session[:logged_in_user_id])
   Post.create contents: params[:contents],
               member_id: session[:logged_in_user_id]
-  redirect "/#{@member.first_name}"
-end
-
-
-post '/new' do
-  @member = Member.new
-  @member.first_name = params[:first_name]
-  @member.last_name = params[:last_name]
-  @member.email = params[:email]
-  @member.password = params[:password]
-  @member.save 
-  session[:logged_in_user_id] = @member.id
   redirect '/'
+  # redirect "/#{@member.first_name}"
 end
+
 
