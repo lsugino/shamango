@@ -31,12 +31,21 @@ get '/new' do
   erb :create_user
 end
 
-get '/member' do
-  @member = Member.find(session[:logged_in_user_id])
-
+get '/logout' do
+  session.clear
+  erb :logout
 end
 
-post '/member'
+get '/:member' do
+  @member = Member.find_by first_name: params[:member]
+  erb :member
+end
+
+post '/:member' do
+  @member = Member.find(session[:logged_in_user_id])
+  Post.create contents: params[:contents],
+              member_id: session[:logged_in_user_id]
+  redirect "/#{@member.first_name}"
 end
 
 
@@ -51,7 +60,3 @@ post '/new' do
   redirect '/'
 end
 
-get '/logout' do
-  session.clear
-  erb :logout
-end
