@@ -1,1 +1,9 @@
 <p>Shamango in the house</p>
+
+<a href ="/logout">Logout<a>
+
+
+<% Post.all.reverse.each do |p| %>
+	 <p><%="#{p.member.first_name}: #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
+<% end %> 
+
