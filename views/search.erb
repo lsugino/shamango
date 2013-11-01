@@ -1,0 +1,5 @@
+<%=flash[:notice] %> <br/>
+
+<% @first_name_matches.each do |member|%>
+<a href="/<%="#{member.first_name.split.join}_#{member.last_name}"%>"><%=  "#{member.first_name} #{member.last_name}" %></a><br />
+<%end%>

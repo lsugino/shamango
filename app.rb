@@ -1,5 +1,6 @@
 require 'sinatra'
 require 'active_record'
+require 'sinatra/flash'
 require_relative './app/models/member'
 require_relative './app/models/post'
 
@@ -32,35 +33,63 @@ get '/new' do
 end
 
 post '/new' do
-  p params
-  @member = Member.new
-  @member.first_name = params[:first_name]
-  @member.last_name = params[:last_name]
-  @member.email = params[:email]
-  @member.password = params[:password]
-  @member.save 
-  p @member
-  session[:logged_in_user_id] = @member.id
-  p session
+  member = Member.create params
+  session[:logged_in_user_id] = member.id
   redirect '/'
 end
 
 get '/logout' do
   session.clear
-  erb :logout
+  erb :login
 end
 
 get '/:member' do
-  @member = Member.find_by first_name: params[:member]
+  # @member = Member.find_by (params[:member].split("_")[0])
+  Member.find_each do |member|
+    if member.name == params[:member].split("_").join
+      @member = member
+    end
+  end
   erb :member
 end
 
+post '/search' do
+  names_split = params[:name].split(" ")
+  if names_split.length > 2
+    first_name = "#{names_split[0]} #{names_split[1]}"
+  else
+    first_name = names_split[0]
+  end
+  @first_name_matches = []
+
+  concat_name = params[:name].split.join
+  Member.find_each do |member|
+    if member.name == concat_name
+      redirect "/#{member.first_name.split.join}_#{member.last_name}"
+    elsif member.first_name == first_name
+      @first_name_matches << member
+    end
+  end
+
+  if @first_name_matches.empty?
+    flash[:notice] = "the person you searched for didn't exist" 
+  else 
+    flash[:notice] = "here are suggestions:"
+  end
+  erb :search 
+end
+
+get '/search' do
+  "thissss be the search page"
+end
+
+
 post '/:member' do
-  @member = Member.find_by_id(session[:logged_in_user_id])
+  member = Member.find_by_id(session[:logged_in_user_id])
   Post.create contents: params[:contents],
               member_id: session[:logged_in_user_id]
-  redirect '/'
-  # redirect "/#{@member.first_name}"
+
+  redirect "/#{member.first_name.split.join}_#{member.last_name}"
 end
 
 
