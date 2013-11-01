@@ -1,8 +1,9 @@
 <p>Shamango in the house</p>
-
+<!-- if someone is logged in, show only their posts and their friends' posts -->
 <% Post.all.reverse.each do |p| %>
    <p>
    <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a>
 	 <%="- #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
 <% end %> 
+
 

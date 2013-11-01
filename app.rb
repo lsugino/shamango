@@ -3,6 +3,7 @@ require 'active_record'
 require 'sinatra/flash'
 require_relative './app/models/member'
 require_relative './app/models/post'
+require_relative './app/models/friendship'
 
 
 ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango')
