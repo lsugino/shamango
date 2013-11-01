@@ -1,6 +1,8 @@
 <p>Shamango in the house</p>
 
 <% Post.all.reverse.each do |p| %>
-	 <p><%="#{p.member.first_name}: #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
+   <p>
+   <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a>
+	 <%="- #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
 <% end %> 
 
