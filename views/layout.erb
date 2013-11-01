@@ -4,8 +4,11 @@
 
   <nav>
 
-    <div class="brand"><a href="/">SHAMANGO</a></div>
+    <a href="/">SHAMANGO</a>
       <% if session[:logged_in_user_id] %>
+      <% member = Member.find_by_id(session[:logged_in_user_id]) %>
+        <a href="/<%="#{member.first_name.split.join}_#{member.last_name}"%>"><%="#{member.first_name}"%></a>
+        <a href ="/logout">Logout<a>
         <form action="/search" method= "post">
          Search by full name: <input type="text" name="name">
         <input type="submit" value="Search">
