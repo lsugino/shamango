@@ -55,16 +55,19 @@ end
 
 post '/search' do
   names_split = params[:name].split(" ")
-  first_name = names_split[0]
-  last_name = names_split[1]
+  if names_split.length > 2
+    first_name = "#{names_split[0]} #{names_split[1]}"
+  else
+    first_name = names_split[0]
+  end
   @first_name_matches = []
-  Member.find_each do |member|
 
-    if member.first_name == first_name
+  concat_name = params[:name].split.join
+  Member.find_each do |member|
+    if member.name == concat_name
+      redirect "/#{member.first_name.split.join}_#{member.last_name}"
+    elsif member.first_name == first_name
       @first_name_matches << member
-      if member.last_name == last_name
-        redirect "/#{member.first_name}_#{member.last_name}"
-      end
     end
   end
 
@@ -86,7 +89,7 @@ post '/:member' do
   Post.create contents: params[:contents],
               member_id: session[:logged_in_user_id]
 
-  redirect "/#{member.first_name}_#{member.last_name}"
+  redirect "/#{member.first_name.split.join}_#{member.last_name}"
 end
 
 
