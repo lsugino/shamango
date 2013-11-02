@@ -19,6 +19,7 @@ get '/' do
 end
 
 post '/' do
+  session[:password_wrong] = false
   @member = Member.find_by email: params[:email]
   if @member.password == params[:password]
     session[:logged_in_user_id] = @member.id
