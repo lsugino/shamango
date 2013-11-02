@@ -1,9 +1,20 @@
 <p>Shamango in the house</p>
 <!-- if someone is logged in, show only their posts and their friends' posts -->
+
+<!-- match to id of current user or user's friends -->
+<% member = Member.find_by_id(session[:logged_in_user_id]) %>
+<% allowed_ids = [member.id] %>
+<% Friendship.find_each do |friendship| %>
+  <% if friendship.member_id_one == member.id %>
+    <% allowed_ids << friendship.member_id_two %>
+  <% elsif friendship.member_id_two == member.id %>
+    <% allowed_ids << friendship.member_id_one %>
+  <% end %>
+<% end %>
 <% Post.all.reverse.each do |p| %>
-   <p>
-   <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a>
-	 <%="- #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
-<% end %> 
-
-
+  <% if allowed_ids.include?(p.member.id) %>
+    <p>
+    <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a>
+    <%="- #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
+  <% end %> 
+<% end %>

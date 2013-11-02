@@ -1,6 +1,7 @@
 <% friends_already = false %>
+<% curr_user = Member.find_by_id(session[:logged_in_user_id]) %>
 <% Friendship.find_each do |friendship| %>
-  <% if (friendship.member_id_one == @member.id && friendship.member_id_two == session[:logged_in_user_id]) || (friendship.member_id_two == @member.id && friendship.member_id_one == session[:logged_in_user_id]) %>
+  <% if (friendship.member_id_one == @member.id && friendship.member_id_two == curr_user.id) || (friendship.member_id_two == @member.id && friendship.member_id_one == curr_user.id) %>
     <% friends_already = true %>
   <% end %>
 <% end %>
@@ -29,9 +30,17 @@
 <button type="button" onclick=<% Friendship.create(:member_id_one => session[:logged_in_user_id], :member_id_two => @member.id, :accepted => false) %>>Add <%= @member.first_name %> as a Friend</button>
 <%end%>
 
+<% friends_with_page_owner = false %>
+<% Friendship.find_each do |friendship| %>
+  <% if (friendship.member_id_one == @member.id && friendship.member_id_two == curr_user.id) || (friendship.member_id_two == @member.id && friendship.member_id_one == curr_user.id) %>
+    <% friends_with_page_owner = true %>
+  <% end %>
+<% end %>
 
-<% Post.where(member_id: @member.id).reverse.each do |p| %>
-   <p>
-   <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a>
-	 <%="- #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
-<% end %> 
+<% if friends_with_page_owner %>
+  <% Post.where(member_id: @member.id).reverse.each do |p| %>
+     <p>
+     <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a>
+  	 <%="- #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
+  <% end %> 
+<% end %>
