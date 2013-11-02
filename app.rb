@@ -44,24 +44,6 @@ get '/logout' do
   erb :login
 end
 
-get '/:member' do
-  # @member = Member.find_by (params[:member].split("_")[0])
-  Member.find_each do |member|
-    if member.name == params[:member].split("_").join
-      @member = member
-    end
-  end
-  erb :member
-end
-
-post '/:member' do
-  member = Member.find_by_id(session[:logged_in_user_id])
-  Post.create contents: params[:contents],
-              member_id: session[:logged_in_user_id]
-
-  redirect "/#{member.first_name.split.join}_#{member.last_name}"
-end
-
 post '/search' do
   names_split = params[:name].split(" ")
   if names_split.length > 2
@@ -93,6 +75,7 @@ get '/search' do
 end
 
 post '/add_friend' do
+  puts params
   Friendship.create(:member_id_one => params[:member_id_one],
    :member_id_two => params[:member_id_two],
    :accepted => false)
@@ -101,7 +84,30 @@ post '/add_friend' do
 end
 
 post '/confirm_friend' do
+  puts params
+  request_to_accept = Friendship.find(params[:request_id].to_i)
+  request_to_accept.accepted = true
+  request_to_accept.save
+  page_owner = Member.find(params[:page_owner_id].to_i)
+  redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
+end
 
+get '/:member' do
+  # @member = Member.find_by (params[:member].split("_")[0])
+  Member.find_each do |member|
+    if member.name == params[:member].split("_").join
+      @member = member
+    end
+  end
+  erb :member
+end
+
+post '/:member' do
+  member = Member.find_by_id(session[:logged_in_user_id])
+  Post.create contents: params[:contents],
+              member_id: session[:logged_in_user_id]
+
+  redirect "/#{member.first_name.split.join}_#{member.last_name}"
 end
 
 
