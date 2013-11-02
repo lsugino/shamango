@@ -54,6 +54,14 @@ get '/:member' do
   erb :member
 end
 
+post '/:member' do
+  member = Member.find_by_id(session[:logged_in_user_id])
+  Post.create contents: params[:contents],
+              member_id: session[:logged_in_user_id]
+
+  redirect "/#{member.first_name.split.join}_#{member.last_name}"
+end
+
 post '/search' do
   names_split = params[:name].split(" ")
   if names_split.length > 2
@@ -84,13 +92,17 @@ get '/search' do
   "thissss be the search page"
 end
 
-
-post '/:member' do
-  member = Member.find_by_id(session[:logged_in_user_id])
-  Post.create contents: params[:contents],
-              member_id: session[:logged_in_user_id]
-
-  redirect "/#{member.first_name.split.join}_#{member.last_name}"
+post '/add_friend' do
+  Friendship.create(:member_id_one => params[:member_id_one],
+   :member_id_two => params[:member_id_two],
+   :accepted => false)
+  member_from_last_page = Member.find_by_id(params[:member_id_two])
+  redirect "/#{member_from_last_page.first_name.split.join}_#{member_from_last_page.last_name}"
 end
+
+post '/confirm_friend' do
+
+end
+
 
 

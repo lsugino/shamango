@@ -16,7 +16,12 @@
         <%= "Pending friend requests:" %>
         <% requesters_and_requests.each do |requester, request| %>
           <%= "#{requester.first_name} #{requester.last_name}" %>
-          <button type="button" onclick=<% request.accepted = true %><% request.save %>>Confirm <%= requester.first_name %> as a Friend</button>
+<!--           <button type="button" onclick=<% request.accepted #= true %><% request.save %>>Confirm <%= requester.first_name %> as a Friend</button> -->
+          <form name="friend_confirm" action="/confirm_friend" method="post">
+            <input type="hidden" name="member_id_one" value=<% session[:logged_in_user_id] %>>
+            <input type="hidden" name="member_id_two" value=<% @member.id %>>
+            <input type="submit" value="Confirm <%= requester.first_name %> as a Friend">
+        </form>
         <% end %>
       <% end %>
     <% end %>
@@ -27,7 +32,11 @@
   </form>
 <% elsif !friends_already %>
 <br/>
-<button type="button" onclick=<% Friendship.create(:member_id_one => session[:logged_in_user_id], :member_id_two => @member.id, :accepted => false) %>>Add <%= @member.first_name %> as a Friend</button>
+<form name="friend_request" action="/add_friend" method="post">
+  <input type="hidden" name="member_id_one" value=<% session[:logged_in_user_id] %>>
+  <input type="hidden" name="member_id_two" value=<% @member.id %>>
+  <input type="submit" value="Add <%= @member.first_name %> as a Friend">
+</form>
 <%end%>
 
 <% friends_with_page_owner = false %>
