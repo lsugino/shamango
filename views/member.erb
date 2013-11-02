@@ -1,7 +1,8 @@
+<!-- Friend requests may not be sending, or confirmations working -->
 <% friends_already = false %>
 <% curr_user = Member.find_by_id(session[:logged_in_user_id]) %>
 <% Friendship.find_each do |friendship| %>
-  <% if (friendship.member_id_one == @member.id && friendship.member_id_two == curr_user.id) || (friendship.member_id_two == @member.id && friendship.member_id_one == curr_user.id) %>
+  <% if ((friendship.member_id_one == @member.id && friendship.member_id_two == curr_user.id) || (friendship.member_id_two == @member.id && friendship.member_id_one == curr_user.id) && friendship.accepted) %>
     <% friends_already = true %>
   <% end %>
 <% end %>
@@ -9,44 +10,35 @@
 <% if @member.id == session[:logged_in_user_id] %>
   <% requesters_and_requests = [] %>
   <% Friendship.find_each do |friend_request| %>
-    <% if friend_request.accepted == false %>
+    <% if friend_request.accepted == false && (@member.id == friend_request.member_id_one || @member.id == friend_request.member_id_two) %>
       <% requester = Member.find_by_id(friend_request.member_id_one) %>
       <% requesters_and_requests << [requester, friend_request] %>
       <% unless requesters_and_requests.empty? %>
         <%= "Pending friend requests:" %>
         <% requesters_and_requests.each do |requester, request| %>
           <%= "#{requester.first_name} #{requester.last_name}" %>
-<!--           <button type="button" onclick=<% request.accepted #= true %><% request.save %>>Confirm <%= requester.first_name %> as a Friend</button> -->
           <form name="friend_confirm" action="/confirm_friend" method="post">
-            <input type="hidden" name="member_id_one" value=<% session[:logged_in_user_id] %>>
-            <input type="hidden" name="member_id_two" value=<% @member.id %>>
+            <input type="hidden" name="request_id" value=<%= "#{request.id}" %>>
+            <input type="hidden" name="page_owner_id" value=<%= "#{@member.id}" %>>
             <input type="submit" value="Confirm <%= requester.first_name %> as a Friend">
-        </form>
+          </form>
         <% end %>
       <% end %>
     <% end %>
   <% end %>
-  <form name="input" action="/:member" method="post">
+    <form name="input" action="/:member" method="post">
     <textarea type = "text" name = "contents" placeholder = "Write a new post!"></textarea>  
     <input type="submit" value="Submit">
   </form>
 <% elsif !friends_already %>
 <br/>
 <form name="friend_request" action="/add_friend" method="post">
-  <input type="hidden" name="member_id_one" value=<% session[:logged_in_user_id] %>>
-  <input type="hidden" name="member_id_two" value=<% @member.id %>>
+  <input type="hidden" name="member_id_one" value=<%= "#{session[:logged_in_user_id]}"%>>
+  <input type="hidden" name="member_id_two" value=<%= "#{@member.id}" %>>
   <input type="submit" value="Add <%= @member.first_name %> as a Friend">
 </form>
 <%end%>
-
-<% friends_with_page_owner = false %>
-<% Friendship.find_each do |friendship| %>
-  <% if (friendship.member_id_one == @member.id && friendship.member_id_two == curr_user.id) || (friendship.member_id_two == @member.id && friendship.member_id_one == curr_user.id) %>
-    <% friends_with_page_owner = true %>
-  <% end %>
-<% end %>
-
-<% if friends_with_page_owner %>
+<% if friends_already || @member.id == curr_user.id %>
   <% Post.where(member_id: @member.id).reverse.each do |p| %>
      <p>
      <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a>
