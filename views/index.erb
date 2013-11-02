@@ -5,9 +5,9 @@
 <% member = Member.find_by_id(session[:logged_in_user_id]) %>
 <% allowed_ids = [member.id] %>
 <% Friendship.find_each do |friendship| %>
-  <% if friendship.member_id_one == member.id %>
+  <% if friendship.member_id_one == member.id && friendship.accepted %>
     <% allowed_ids << friendship.member_id_two %>
-  <% elsif friendship.member_id_two == member.id %>
+  <% elsif friendship.member_id_two == member.id && friendship.accepted %>
     <% allowed_ids << friendship.member_id_one %>
   <% end %>
 <% end %>
