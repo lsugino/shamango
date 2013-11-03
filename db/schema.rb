@@ -35,6 +35,7 @@ ActiveRecord::Schema.define(version: 20131101223020) do
   create_table "posts", force: true do |t|
     t.integer  "member_id"
     t.text     "contents"
+    t.integer  "post_reciever"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

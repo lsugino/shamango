@@ -14,7 +14,9 @@
 <% Post.all.reverse.each do |p| %>
   <% if allowed_ids.include?(p.member.id) %>
     <p>
-    <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a>
-    <%="- #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
+      <%reciever = Member.find_by_id(p.post_reciever)%>
+    <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a> >> 
+    <a href="/<%="#{reciever.first_name.split.join}_#{reciever.last_name}"%>"><%="#{reciever.first_name}"%></a>
+    <%=": #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec} on #{p.month(p.created_at.month)} #{p.created_at.day}, #{p.created_at.year}"%> </p>
   <% end %> 
 <% end %>

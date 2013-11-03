@@ -1,16 +1,19 @@
-<!-- Friend requests may not be sending, or confirmations working -->
+
 <% friends_already = false %>
 <% curr_user = Member.find_by_id(session[:logged_in_user_id]) %>
+<!-- this checks if the current user is friends with the owner of member_page -->
 <% Friendship.find_each do |friendship| %>
-  <% if ((friendship.member_id_one == @member.id && friendship.member_id_two == curr_user.id) || (friendship.member_id_two == @member.id && friendship.member_id_one == curr_user.id) && friendship.accepted) %>
+  <% if ((friendship.member_id_one == @page_owner.id && friendship.member_id_two == curr_user.id) || (friendship.member_id_two == @page_owner.id && friendship.member_id_one == curr_user.id) && friendship.accepted) %>
     <% friends_already = true %>
   <% end %>
 <% end %>
-<%=@member.first_name%>
-<% if @member.id == session[:logged_in_user_id] %>
+
+<!-- this checks if the current user is the owner of the member_page they are viewing. -->
+<%=@page_owner.first_name%>
+<% if @page_owner.id == session[:logged_in_user_id] %>
   <% requesters_and_requests = [] %>
   <% Friendship.find_each do |friend_request| %>
-    <% if friend_request.accepted == false && (@member.id == friend_request.member_id_one || @member.id == friend_request.member_id_two) %>
+    <% if friend_request.accepted == false && (@page_owner.id == friend_request.member_id_one || @page_owner.id == friend_request.member_id_two) %>
       <% requester = Member.find_by_id(friend_request.member_id_one) %>
       <% requesters_and_requests << [requester, friend_request] %>
       <% unless requesters_and_requests.empty? %>
@@ -19,7 +22,7 @@
           <%= "#{requester.first_name} #{requester.last_name}" %>
           <form name="friend_confirm" action="/confirm_friend" method="post">
             <input type="hidden" name="request_id" value=<%= "#{request.id}" %>>
-            <input type="hidden" name="page_owner_id" value=<%= "#{@member.id}" %>>
+            <input type="hidden" name="page_owner_id" value=<%= "#{@page_owner.id}" %>>
             <input type="submit" value="Confirm <%= requester.first_name %> as a Friend">
           </form>
         <% end %>
@@ -27,21 +30,25 @@
     <% end %>
   <% end %>
     <form name="input" action="/:member" method="post">
-    <textarea type = "text" name = "contents" placeholder = "Write a new post!"></textarea>  
-    <input type="submit" value="Submit">
-  </form>
+      <textarea type = "text" name = "contents" placeholder = "Write a new post!"></textarea>  
+      <input type="hidden" name="reciever_id" value=<%= "#{@page_owner.id}" %>>
+      <input type="submit" value="Submit">
+    </form>
 <% elsif !friends_already %>
 <br/>
 <form name="friend_request" action="/add_friend" method="post">
   <input type="hidden" name="member_id_one" value=<%= "#{session[:logged_in_user_id]}"%>>
-  <input type="hidden" name="member_id_two" value=<%= "#{@member.id}" %>>
-  <input type="submit" value="Add <%= @member.first_name %> as a Friend">
+  <input type="hidden" name="member_id_two" value=<%= "#{@page_owner.id}" %>>
+  <input type="submit" value="Add <%= @page_owner.first_name %> as a Friend">
 </form>
 <%end%>
-<% if friends_already || @member.id == curr_user.id %>
-  <% Post.where(member_id: @member.id).reverse.each do |p| %>
+
+<% if friends_already || @page_owner.id == curr_user.id %>
+  <% Post.where(member_id: @page_owner.id).reverse.each do |p| %>
      <p>
-     <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a>
-  	 <%="- #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec}"%> </p>
+      <%reciever = Member.find_by_id(p.post_reciever)%>
+    <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a> >> 
+    <a href="/<%="#{reciever.first_name.split.join}_#{reciever.last_name}"%>"><%="#{reciever.first_name}"%></a>
+    <%=": #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec} on #{p.month(p.created_at.month)} #{p.created_at.day}, #{p.created_at.year}"%> </p>
   <% end %> 
 <% end %>

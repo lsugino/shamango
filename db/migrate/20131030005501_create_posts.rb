@@ -3,6 +3,7 @@ class CreatePosts < ActiveRecord::Migration
     create_table(:posts) do |t|
       t.belongs_to :member
       t.text :contents
+      t.integer :post_reciever
       t.timestamps
     end
   end

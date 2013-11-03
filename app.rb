@@ -76,7 +76,6 @@ get '/search' do
 end
 
 post '/add_friend' do
-  puts params
   Friendship.create(:member_id_one => params[:member_id_one],
    :member_id_two => params[:member_id_two],
    :accepted => false)
@@ -95,9 +94,10 @@ end
 
 get '/:member' do
   # @member = Member.find_by (params[:member].split("_")[0])
+  puts params
   Member.find_each do |member|
     if member.name == params[:member].split("_").join
-      @member = member
+      @page_owner = member
     end
   end
   erb :member
@@ -106,7 +106,8 @@ end
 post '/:member' do
   member = Member.find_by_id(session[:logged_in_user_id])
   Post.create contents: params[:contents],
-              member_id: session[:logged_in_user_id]
+              member_id: session[:logged_in_user_id],
+              post_reciever: session[:logged_in_user_id]
 
   redirect "/#{member.first_name.split.join}_#{member.last_name}"
 end
