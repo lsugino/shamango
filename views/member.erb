@@ -52,7 +52,7 @@
   <% Post.where(post_reciever: @page_owner.id).reverse.each do |p| %>
     <% ph << p %>
   <% end %> 
-
+  <% ph.sort! {|x,y| x.created_at <=> y.created_at}.reverse! %>
   <%ph.uniq.each do |p|%>
     <p>
       <%reciever = Member.find_by_id(p.post_reciever)%>

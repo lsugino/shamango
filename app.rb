@@ -93,6 +93,7 @@ post '/confirm_friend' do
 end
 
 get '/:member' do
+  puts params
   Member.find_each do |member|
     if member.name == params[:member].split("_").join
       @page_owner = member
@@ -109,6 +110,3 @@ post '/:member' do
 
   redirect "/#{member.first_name.split.join}_#{member.last_name}"
 end
-
-
-
