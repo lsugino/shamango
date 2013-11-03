@@ -12,12 +12,6 @@ ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shaman
 enable :sessions
 
 get '/' do
-  # Member.find_each do |member|
-    # if member.name == params[:member].split("_").join
-    #   @page_owner = member
-    # end
-  # end
-
   if session[:logged_in_user_id]
     erb :index
   else
@@ -50,6 +44,24 @@ end
 get '/logout' do
   session.clear
   erb :login
+end
+
+get '/delete_account' do
+  @dont_show_search = true
+  erb :delete
+end
+
+post '/delete_account' do
+  session[:password_wrong] = false
+  @member = Member.find_by email: params[:email]
+  if @member.password == params[:password]
+    @member.destroy
+    session.clear
+    redirect '/'
+  else
+    session[:password_wrong] = true
+    redirect '/delete_account'
+  end
 end
 
 post '/search' do
@@ -105,6 +117,29 @@ post '/likepost' do
   redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
 end
 
+post '/deletepost' do
+  post = Post.find_by_id(params[:post_id].to_i)
+  Post.find_by_id(post).destroy
+  page_owner = Member.find_by_id(params[:page_owner].to_i)
+  redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
+end
+
+
+post '/likeposthome' do
+  post = Post.find_by_id(params[:post_id].to_i)
+  member = Member.find_by_id(params[:member_id].to_i)
+  Likedpost.create member_id: member.id,
+                   post_id: post.id
+  page_owner = Member.find_by_id(params[:page_owner].to_i)
+  redirect "/"
+end
+
+post '/deleteposthome' do
+  post = Post.find_by_id(params[:post_id].to_i)
+  Post.find_by_id(post).destroy
+  page_owner = Member.find_by_id(params[:page_owner].to_i)
+  redirect "/"
+end
 
 get '/:member' do
   Member.find_each do |member|
@@ -122,5 +157,13 @@ post '/:member' do
               post_reciever: params[:reciever_id]
   page_owner = Member.find_by_id(params[:page_owner].to_i)
   redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
-  # redirect "/#{member.first_name.split.join}_#{member.last_name}"
+end
+
+post '/:member/home' do
+  member = Member.find_by_id(session[:logged_in_user_id])
+  Post.create contents: params[:contents],
+              member_id: session[:logged_in_user_id],
+              post_reciever: params[:reciever_id]
+  page_owner = Member.find_by_id(params[:page_owner].to_i)
+  redirect "/"
 end

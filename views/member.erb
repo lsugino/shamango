@@ -57,6 +57,8 @@
   <% ph.sort! {|x,y| x.created_at <=> y.created_at}.reverse! %>
 
   <%ph.uniq.each do |post|%>
+    <%post_owner = false%>
+    <%post_owner = true if post.member.id == curr_user.id%>
     <%member_ids_that_like_this_post = []%>
     <%Likedpost.all.each do |lp|%>
       <%if (lp.post_id == post.id)%>
@@ -73,7 +75,9 @@
       <a href="/<%="#{post.member.first_name.split.join}_#{post.member.last_name}"%>"><%="#{post.member.first_name}"%></a> >> 
       <a href="/<%="#{reciever.first_name.split.join}_#{reciever.last_name}"%>"><%="#{reciever.first_name}"%></a>
       <%=": #{post.contents} at #{post.created_at.hour}:#{post.created_at.min}:#{post.created_at.sec} on #{post.month(post.created_at.month)} #{post.created_at.day}, #{post.created_at.year}"%> <br/>
-      <%="  ---> Liked by: #{members.join(", ")}"%>
+       <%unless members.empty?%>
+        <%="  ---> Liked by: #{members.join(", ")}"%>
+      <%end%>
     </p>
 
     <%liked_by_user = false%>
@@ -82,6 +86,7 @@
         <%liked_by_user = true%>
       <%end%>
     <%end%>
+
     <%unless liked_by_user%>
       <form name="like_post" action="/likepost" method="post">
         <input type="hidden" name="post_id" value="<%=post.id%>">
@@ -90,6 +95,15 @@
         <input type="submit" value="Like!">
       </form>
     <%end%>  
+
+    <%if post_owner%>
+      <form name="delete_post" action="/deletepost" method="post">
+        <input type="hidden" name="post_id" value="<%=post.id%>">
+        <input type="hidden" name="page_owner" value="<%=@page_owner.id%>">
+        <input type="submit" value="Delete">
+      </form>
+    <%end%>
+
   <%end%>
 
 <% end %>

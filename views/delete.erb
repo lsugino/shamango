@@ -1,0 +1,7 @@
+<%="Please Reenter Password" if session[:password_wrong] %>
+<p>Please verify information</p>
+	<form name="input" action="/delete_account" method="post">
+	Email: <input type="text" name="email">
+	Password: <input type="password" name="password">
+	<input type="submit" value="Submit">
+	</form>
