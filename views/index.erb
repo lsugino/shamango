@@ -2,21 +2,67 @@
 <!-- if someone is logged in, show only their posts and their friends' posts -->
 
 <!-- match to id of current user or user's friends -->
-<% member = Member.find_by_id(session[:logged_in_user_id]) %>
-<% allowed_ids = [member.id] %>
+<% curr_member = Member.find_by_id(session[:logged_in_user_id]) %>
+<% allowed_ids = [curr_member.id] %>
 <% Friendship.find_each do |friendship| %>
-  <% if friendship.member_id_one == member.id && friendship.accepted %>
+  <% if friendship.member_id_one == curr_member.id && friendship.accepted %>
     <% allowed_ids << friendship.member_id_two %>
-  <% elsif friendship.member_id_two == member.id && friendship.accepted %>
+  <% elsif friendship.member_id_two == curr_member.id && friendship.accepted %>
     <% allowed_ids << friendship.member_id_one %>
   <% end %>
 <% end %>
-<% Post.all.reverse.each do |p| %>
-  <% if allowed_ids.include?(p.member.id) %>
-    <p>
-      <%reciever = Member.find_by_id(p.post_reciever)%>
-    <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a> >> 
-    <a href="/<%="#{reciever.first_name.split.join}_#{reciever.last_name}"%>"><%="#{reciever.first_name}"%></a>
-    <%=": #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec} on #{p.month(p.created_at.month)} #{p.created_at.day}, #{p.created_at.year}"%> </p>
+
+<form name="input" action="/:member" method="post">
+    <textarea type = "text" name = "contents" placeholder = "Write a new post!"></textarea>  
+    <input type="hidden" name="reciever_id" value=<%="#{curr_member.id}"%>>
+    <input type="hidden" name="page_owner" value="<%=curr_member.id%>">
+    <input type="submit" value="Submit">
+  </form>
+  
+  <%ph = []%>
+  <% Post.where(member_id: curr_member.id).reverse.each do |p| %>
+    <% ph << p %>
   <% end %> 
-<% end %>
+
+  <% Post.where(post_reciever: curr_member.id).reverse.each do |p| %>
+    <% ph << p %>
+  <% end %> 
+
+  <% ph.sort! {|x,y| x.created_at <=> y.created_at}.reverse! %>
+
+  <%ph.uniq.each do |post|%>
+    <%member_ids_that_like_this_post = []%>
+    <%Likedpost.all.each do |lp|%>
+      <%if (lp.post_id == post.id)%>
+        <%member_ids_that_like_this_post << lp.member_id%>
+      <%end%>
+    <%end%>
+    <%members = []%>
+    <%member_ids_that_like_this_post.each do |member_id|%>
+      <%members << Member.find_by_id(member_id).first_name%>
+    <%end%>
+
+    <p>
+      <%reciever = Member.find_by_id(post.post_reciever)%>
+      <a href="/<%="#{post.member.first_name.split.join}_#{post.member.last_name}"%>"><%="#{post.member.first_name}"%></a> >> 
+      <a href="/<%="#{reciever.first_name.split.join}_#{reciever.last_name}"%>"><%="#{reciever.first_name}"%></a>
+      <%=": #{post.contents} at #{post.created_at.hour}:#{post.created_at.min}:#{post.created_at.sec} on #{post.month(post.created_at.month)} #{post.created_at.day}, #{post.created_at.year}"%> <br/>
+      <%="  ---> Liked by: #{members.join(", ")}"%>
+    </p>
+
+    <%liked_by_user = false%>
+    <%Likedpost.all.each do |lp|%>
+      <%if (lp.member_id == curr_member.id) && (lp.post_id == post.id)%>
+        <%liked_by_user = true%>
+      <%end%>
+    <%end%>
+    <%unless liked_by_user%>
+      <form name="like_post" action="/likepost" method="post">
+        <input type="hidden" name="post_id" value="<%=post.id%>">
+        <input type="hidden" name="member_id" value="<%=curr_member.id%>">
+        <input type="hidden" name="page_owner" value="<%=curr_member.id%>">
+        <input type="submit" value="Like!">
+      </form>
+    <%end%>  
+  <%end%>
+

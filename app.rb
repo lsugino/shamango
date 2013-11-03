@@ -4,6 +4,7 @@ require 'sinatra/flash'
 require_relative './app/models/member'
 require_relative './app/models/post'
 require_relative './app/models/friendship'
+require_relative './app/models/likedpost'
 
 
 ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango')
@@ -11,6 +12,12 @@ ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shaman
 enable :sessions
 
 get '/' do
+  # Member.find_each do |member|
+    # if member.name == params[:member].split("_").join
+    #   @page_owner = member
+    # end
+  # end
+
   if session[:logged_in_user_id]
     erb :index
   else
@@ -71,9 +78,6 @@ post '/search' do
   erb :search 
 end
 
-get '/search' do
-  "thissss be the search page"
-end
 
 post '/add_friend' do
   Friendship.create(:member_id_one => params[:member_id_one],
@@ -92,8 +96,17 @@ post '/confirm_friend' do
   redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
 end
 
+post '/likepost' do
+  post = Post.find_by_id(params[:post_id].to_i)
+  member = Member.find_by_id(params[:member_id].to_i)
+  Likedpost.create member_id: member.id,
+                   post_id: post.id
+  page_owner = Member.find_by_id(params[:page_owner].to_i)
+  redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
+end
+
+
 get '/:member' do
-  puts params
   Member.find_each do |member|
     if member.name == params[:member].split("_").join
       @page_owner = member
@@ -107,6 +120,7 @@ post '/:member' do
   Post.create contents: params[:contents],
               member_id: session[:logged_in_user_id],
               post_reciever: params[:reciever_id]
-
-  redirect "/#{member.first_name.split.join}_#{member.last_name}"
+  page_owner = Member.find_by_id(params[:page_owner].to_i)
+  redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
+  # redirect "/#{member.first_name.split.join}_#{member.last_name}"
 end
