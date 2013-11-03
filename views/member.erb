@@ -29,26 +29,36 @@
       <% end %>
     <% end %>
   <% end %>
-    <form name="input" action="/:member" method="post">
-      <textarea type = "text" name = "contents" placeholder = "Write a new post!"></textarea>  
-      <input type="hidden" name="reciever_id" value=<%= "#{@page_owner.id}" %>>
-      <input type="submit" value="Submit">
-    </form>
-<% elsif !friends_already %>
-<br/>
-<form name="friend_request" action="/add_friend" method="post">
-  <input type="hidden" name="member_id_one" value=<%= "#{session[:logged_in_user_id]}"%>>
-  <input type="hidden" name="member_id_two" value=<%= "#{@page_owner.id}" %>>
-  <input type="submit" value="Add <%= @page_owner.first_name %> as a Friend">
-</form>
+<% elsif !friends_already %><br/>
+  <form name="friend_request" action="/add_friend" method="post">
+    <input type="hidden" name="member_id_one" value=<%= "#{session[:logged_in_user_id]}"%>>
+    <input type="hidden" name="member_id_two" value=<%= "#{@page_owner.id}" %>>
+    <input type="submit" value="Add <%= @page_owner.first_name %> as a Friend">
+  </form>
 <%end%>
 
 <% if friends_already || @page_owner.id == curr_user.id %>
+  <form name="input" action="/:member" method="post">
+    <textarea type = "text" name = "contents" placeholder = "Write a new post!"></textarea>  
+    <input type="hidden" name="reciever_id" value=<%="#{@page_owner.id}"%>>
+    <input type="submit" value="Submit">
+  </form>
+  <!-- also see the post on your wall if you were the reciever -->
+  <%ph = []%>
   <% Post.where(member_id: @page_owner.id).reverse.each do |p| %>
-     <p>
-      <%reciever = Member.find_by_id(p.post_reciever)%>
-    <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a> >> 
-    <a href="/<%="#{reciever.first_name.split.join}_#{reciever.last_name}"%>"><%="#{reciever.first_name}"%></a>
-    <%=": #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec} on #{p.month(p.created_at.month)} #{p.created_at.day}, #{p.created_at.year}"%> </p>
+    <% ph << p %>
   <% end %> 
+
+  <% Post.where(post_reciever: @page_owner.id).reverse.each do |p| %>
+    <% ph << p %>
+  <% end %> 
+
+  <%ph.uniq.each do |p|%>
+    <p>
+      <%reciever = Member.find_by_id(p.post_reciever)%>
+      <a href="/<%="#{p.member.first_name.split.join}_#{p.member.last_name}"%>"><%="#{p.member.first_name}"%></a> >> 
+      <a href="/<%="#{reciever.first_name.split.join}_#{reciever.last_name}"%>"><%="#{reciever.first_name}"%></a>
+      <%=": #{p.contents} at #{p.created_at.hour}:#{p.created_at.min}:#{p.created_at.sec} on #{p.month(p.created_at.month)} #{p.created_at.day}, #{p.created_at.year}"%> 
+    </p>
+  <%end%>
 <% end %>
