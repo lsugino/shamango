@@ -54,11 +54,11 @@ post '/search' do
   end
   @first_name_matches = []
 
-  concat_name = params[:name].split.join
+  concat_name = params[:name].split.join.downcase
   Member.find_each do |member|
-    if member.name == concat_name
+    if member.name.downcase == concat_name
       redirect "/#{member.first_name.split.join}_#{member.last_name}"
-    elsif member.first_name == first_name
+    elsif member.first_name.downcase == first_name.downcase
       @first_name_matches << member
     end
   end
