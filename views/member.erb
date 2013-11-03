@@ -76,8 +76,22 @@
       <a href="/<%="#{reciever.first_name.split.join}_#{reciever.last_name}"%>"><%="#{reciever.first_name}"%></a>
       <%=": #{post.contents} at #{post.created_at.hour}:#{post.created_at.min}:#{post.created_at.sec} on #{post.month(post.created_at.month)} #{post.created_at.day}, #{post.created_at.year}"%> <br/>
        <%unless members.empty?%>
-        <%="  ---> Liked by: #{members.join(", ")}"%>
+        <%="  ---> Liked by: #{members.join(", ")}"%><br/>
       <%end%>
+      <%ch = []%>
+      <% Comment.where(post_id: post.id).reverse.each do |c| %>
+        <% ch << c %>
+      <% end %> 
+      <% ch.sort! {|x,y| x.created_at <=> y.created_at} %>
+      <% ch.each do |comment|%>
+        <br/><%=comment.contents%><br/>
+      <%end%>
+        <form name="input" action="/add_comment" method="post">
+        <textarea type = "text" name = "contents" placeholder = "Write a comment!"></textarea>  
+        <input type="hidden" name="post_id" value=<%="#{post.id}"%>>
+        <input type="hidden" name="page_owner" value="<%=@page_owner.id%>">
+        <input type="submit" value="Submit">
+        </form>
     </p>
 
     <%liked_by_user = false%>

@@ -5,6 +5,7 @@ require_relative './app/models/member'
 require_relative './app/models/post'
 require_relative './app/models/friendship'
 require_relative './app/models/likedpost'
+require_relative './app/models/comment'
 
 
 ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango')
@@ -56,12 +57,25 @@ post '/delete_account' do
   @member = Member.find_by email: params[:email]
   if @member.password == params[:password]
     @member.destroy
+    Post.where(member_id: @member.id).destroy_all
     session.clear
     redirect '/'
   else
     session[:password_wrong] = true
     redirect '/delete_account'
   end
+end
+
+post '/add_comment/home' do
+  Comment.create params
+  redirect '/'
+end
+
+post '/add_comment' do
+  Comment.create post_id: params[:post_id],
+                 contents: params[:contents]
+  page_owner = Member.find_by_id(params[:page_owner].to_i)
+  redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
 end
 
 post '/search' do

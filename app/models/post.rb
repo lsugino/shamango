@@ -1,5 +1,6 @@
 class Post < ActiveRecord::Base
   belongs_to :member
+  has_many :comments
   def month(month_int)
   	month = ""
       case month_int
