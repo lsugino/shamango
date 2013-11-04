@@ -3,17 +3,26 @@
 <% curr_user = Member.find_by_id(session[:logged_in_user_id]) %>
 <!-- this checks if the current user is friends with the owner of member_page -->
 <% Friendship.find_each do |friendship| %>
-  <% if ((friendship.member_id_one == @page_owner.id && friendship.member_id_two == curr_user.id) || (friendship.member_id_two == @page_owner.id && friendship.member_id_one == curr_user.id) && friendship.accepted) %>
+  <% if ((friendship.member_id_one == @page_owner.id && friendship.member_id_two == curr_user.id && friendship.accepted) || (friendship.member_id_two == @page_owner.id && friendship.member_id_one == curr_user.id && friendship.accepted)) %>
     <% friends_already = true %>
   <% end %>
 <% end %>
+<%request_sent = false%>
+<% Friendship.all.each do |friendship| %>
+  <%request_sent = true if ((friendship[:member_id_one] == curr_user.id) && (friendship[:member_id_two] == @page_owner.id))%>
+<%end%>
+
+<%request_sent_to = false%>
+<% Friendship.all.each do |friendship| %>
+  <%request_sent_to = true if ((friendship[:member_id_two] == curr_user.id) && (friendship[:member_id_one] == @page_owner.id))%>
+<%end%>
 
 <!-- this checks if the current user is the owner of the member_page they are viewing. -->
 <%=@page_owner.first_name%>
 <% if @page_owner.id == session[:logged_in_user_id] %>
   <% requesters_and_requests = [] %>
   <% Friendship.find_each do |friend_request| %>
-    <% if friend_request.accepted == false && (@page_owner.id == friend_request.member_id_one || @page_owner.id == friend_request.member_id_two) %>
+    <% if (friend_request.accepted == false && @page_owner.id == friend_request.member_id_two) %>
       <% requester = Member.find_by_id(friend_request.member_id_one) %>
       <% requesters_and_requests << [requester, friend_request] %>
       <% unless requesters_and_requests.empty? %>
@@ -29,14 +38,27 @@
       <% end %>
     <% end %>
   <% end %>
-<% elsif !friends_already %><br/>
+<!-- not page owner, not friends yet, request not sent either-->
+<% elsif !friends_already && request_sent_to%><br/>
+This person has sent you a friend request already!
+  <form name="friend_confirm" action="/confirm_friend" method="post">
+    <input type="hidden" name="curr_user_id" value=<%= "#{curr_user.id}" %>>
+    <input type="hidden" name="page_owner_id" value=<%= "#{@page_owner.id}" %>>
+    <input type="hidden" name="different" value=<%=true%>>
+    <input type="submit" value="Confirm <%= @page_owner.first_name %> as a Friend">
+  </form>
+<% elsif !friends_already && !request_sent%><br/>
   <form name="friend_request" action="/add_friend" method="post">
     <input type="hidden" name="member_id_one" value=<%= "#{session[:logged_in_user_id]}"%>>
     <input type="hidden" name="member_id_two" value=<%= "#{@page_owner.id}" %>>
     <input type="submit" value="Add <%= @page_owner.first_name %> as a Friend">
   </form>
+<!-- not page owner, not friends yet, request HAS BEEN SENT-->  
+<%elsif request_sent && !friends_already%>
+<br/><%="You have sent a friend request to this user. Request pending"%><br/>
 <%end%>
 
+<!-- page owner OR friends with the page owner -->  
 <% if friends_already || @page_owner.id == curr_user.id %>
   <form name="input" action="/:member" method="post">
     <textarea type = "text" name = "contents" placeholder = "Write a new post!"></textarea>  

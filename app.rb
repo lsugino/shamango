@@ -44,7 +44,7 @@ end
 
 get '/logout' do
   session.clear
-  erb :login
+  redirect '/'
 end
 
 get '/delete_account' do
@@ -114,11 +114,19 @@ post '/add_friend' do
 end
 
 post '/confirm_friend' do
-  puts params
-  request_to_accept = Friendship.find(params[:request_id].to_i)
-  request_to_accept.accepted = true
-  request_to_accept.save
   page_owner = Member.find(params[:page_owner_id].to_i)
+  if params[:different] == "true"
+    # request_to_accept = Friendship.find_by_member_id_one(params[:request_id].to_i)
+    request_to_accept = Friendship.where(member_id_one: params[:page_owner_id].to_i, member_id_two: params[:curr_user_id].to_i).take
+    puts request_to_accept.id
+    request_to_accept.accepted = true
+    request_to_accept.save
+  else
+    request_to_accept = Friendship.find(params[:request_id].to_i)
+    request_to_accept.accepted = true
+    request_to_accept.save
+  end
+  
   redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
 end
 
