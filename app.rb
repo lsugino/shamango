@@ -11,7 +11,7 @@ require_relative './app/models/notification'
 
 # ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango') NEED THIS TO RUN LOCALLY
 
-ActiveRecord::Base.establish_connection('postgres://localhost/mydb')
+ActiveRecord::Base.establish_connection(ENV['DATABASE_URL'] ||'postgres://localhost/mydb')
 
 enable :sessions
 
