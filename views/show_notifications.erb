@@ -2,7 +2,4 @@
 <%="You have notifications:" unless @notifications.empty?%><br/>
 <%@notifications.reverse.each do |notification|%>
 	<br/>--><%= notification.notification_message %>
-	<%unless notification.seen%>
-		<form action="/comment_seen" method= "post"> <input type="hidden" name= "notification_id" value=<%=notification.id%>><input type="submit" value="Seen"></form><br/>
-	<%end%>	
 <%end%>

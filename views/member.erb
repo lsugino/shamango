@@ -1,20 +1,19 @@
 
 <% friends_already = false %>
-<% curr_user = Member.find_by_id(session[:logged_in_user_id]) %>
 <!-- this checks if the current user is friends with the owner of member_page -->
 <% Friendship.find_each do |friendship| %>
-  <% if ((friendship.member_id_one == @page_owner.id && friendship.member_id_two == curr_user.id && friendship.accepted) || (friendship.member_id_two == @page_owner.id && friendship.member_id_one == curr_user.id && friendship.accepted)) %>
+  <% if ((friendship.member_id_one == @page_owner.id && friendship.member_id_two == current_member.id && friendship.accepted) || (friendship.member_id_two == @page_owner.id && friendship.member_id_one == current_member.id && friendship.accepted)) %>
     <% friends_already = true %>
   <% end %>
 <% end %>
 <%request_sent = false%>
 <% Friendship.all.each do |friendship| %>
-  <%request_sent = true if ((friendship[:member_id_one] == curr_user.id) && (friendship[:member_id_two] == @page_owner.id))%>
+  <%request_sent = true if ((friendship[:member_id_one] == current_member.id) && (friendship[:member_id_two] == @page_owner.id))%>
 <%end%>
 
 <%request_sent_to = false%>
 <% Friendship.all.each do |friendship| %>
-  <%request_sent_to = true if ((friendship[:member_id_two] == curr_user.id) && (friendship[:member_id_one] == @page_owner.id))%>
+  <%request_sent_to = true if ((friendship[:member_id_two] == current_member.id) && (friendship[:member_id_one] == @page_owner.id))%>
 <%end%>
 
 <!-- this checks if the current user is the owner of the member_page they are viewing. -->
@@ -42,7 +41,7 @@
 <% elsif !friends_already && request_sent_to%><br/>
 This person has sent you a friend request already!
   <form name="friend_confirm" action="/confirm_friend" method="post">
-    <input type="hidden" name="curr_user_id" value=<%= "#{curr_user.id}" %>>
+    <input type="hidden" name="current_member_id" value=<%= "#{current_member.id}" %>>
     <input type="hidden" name="page_owner_id" value=<%= "#{@page_owner.id}" %>>
     <input type="hidden" name="different" value=<%=true%>>
     <input type="submit" value="Confirm <%= @page_owner.first_name %> as a Friend">
@@ -58,8 +57,14 @@ This person has sent you a friend request already!
 <br/><%="You have sent a friend request to this user. Request pending"%><br/>
 <%end%>
 
+<!-- friends with the page owner AND NOT PAGE OWNER-->  
+<% if friends_already && @page_owner.id != current_member.id %>
+  <form action="" method=""> <input type="submit" value="Unfriend <%=@page_owner.first_name%>"></form>
+<%end%>
+
+
 <!-- page owner OR friends with the page owner -->  
-<% if friends_already || @page_owner.id == curr_user.id %>
+<% if friends_already || @page_owner.id == current_member.id %>
   <form name="input" action="/:member" method="post">
     <textarea type = "text" name = "contents" placeholder = "Write a new post!"></textarea>  
     <input type="hidden" name="reciever_id" value=<%="#{@page_owner.id}"%>>
@@ -80,7 +85,7 @@ This person has sent you a friend request already!
 
   <%ph.uniq.each do |post|%>
     <%post_owner = false%>
-    <%post_owner = true if post.member.id == curr_user.id%>
+    <%post_owner = true if post.member.id == current_member.id%>
     <%member_ids_that_like_this_post = []%>
     <%Likedpost.all.each do |lp|%>
       <%if (lp.post_id == post.id)%>
@@ -118,7 +123,7 @@ This person has sent you a friend request already!
 
     <%liked_by_user = false%>
     <%Likedpost.all.each do |lp|%>
-      <%if (lp.member_id == curr_user.id) && (lp.post_id == post.id)%>
+      <%if (lp.member_id == current_member.id) && (lp.post_id == post.id)%>
         <%liked_by_user = true%>
       <%end%>
     <%end%>
@@ -126,7 +131,7 @@ This person has sent you a friend request already!
     <%unless liked_by_user%>
       <form name="like_post" action="/likepost" method="post">
         <input type="hidden" name="post_id" value="<%=post.id%>">
-        <input type="hidden" name="member_id" value="<%=curr_user.id%>">
+        <input type="hidden" name="member_id" value="<%=current_member.id%>">
         <input type="hidden" name="page_owner" value="<%=@page_owner.id%>">
         <input type="submit" value="Like!">
       </form>

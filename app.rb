@@ -121,12 +121,6 @@ post '/search' do
       @first_name_matches << member
     end
   end
-
-  if @first_name_matches.empty?
-    flash[:notice] = "the person you searched for didn't exist" 
-  else 
-    flash[:notice] = "here are suggestions:"
-  end
   erb :search 
 end
 
@@ -160,10 +154,7 @@ post '/confirm_friend' do
 end
 
 post '/comment_seen' do
-  puts params
   notification = Notification.find_by_id(params[:notification_id])
-  puts notification
-  puts notification.id
   notification.seen = true
   notification.save
   redirect "/#{current_member.first_name}_#{current_member.last_name}/notifications"
@@ -215,6 +206,12 @@ end
 
 get '/:member/notifications' do
   @notifications = Notification.where(member_id: current_member.id)
+  Notification.all.each { |n|
+    if n.member_id == current_member.id
+      n.seen = true 
+      n.save
+    end
+  }
   erb :show_notifications
 end
 
