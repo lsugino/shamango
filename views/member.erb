@@ -59,14 +59,14 @@ This person has sent you a friend request already!
 
 <!-- friends with the page owner AND NOT PAGE OWNER-->  
 <% if friends_already && @page_owner.id != current_member.id %>
-  <form action="" method=""> <input type="submit" value="Unfriend <%=@page_owner.first_name%>"></form>
+  <form action="/remove_friend" method="post"> <input type="submit" value="Unfriend <%=@page_owner.first_name%>"><input type="hidden" name="page_owner_id" value=<%= "#{@page_owner.id}" %>></form>
 <%end%>
 
 
 <!-- page owner OR friends with the page owner -->  
 <% if friends_already || @page_owner.id == current_member.id %>
   <form name="input" action="/:member" method="post">
-    <textarea type = "text" name = "contents" placeholder = "Write a new post!"></textarea>  
+    <textarea type = "text" name="contents" placeholder = "Write a new post!"></textarea>  
     <input type="hidden" name="reciever_id" value=<%="#{@page_owner.id}"%>>
     <input type="hidden" name="page_owner" value="<%=@page_owner.id%>">
     <input type="submit" value="Submit">
