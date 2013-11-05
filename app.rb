@@ -9,7 +9,9 @@ require_relative './app/models/comment'
 require_relative './app/models/notification'
 
 
-ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango')
+# ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango') NEED THIS TO RUN LOCALLY
+
+ActiveRecord::Base.establish_connection('postgres://localhost/mydb')
 
 enable :sessions
 
