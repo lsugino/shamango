@@ -1,0 +1,12 @@
+<% curr_member = Member.find_by_id(session[:logged_in_user_id]) %>
+<%user_notifications = []%>
+<%Notification.all.each do |n|%>
+	<%user_notifications << n if n.member_id == curr_member.id%>
+<%end%>
+<%="You have no notifications!" if user_notifications.empty?%>
+<%="You have notifications:" unless user_notifications.empty?%><br/>
+<%Notification.all.reverse.each do |notification|%>
+	<%if notification.member_id == curr_member.id%>
+		<br/>--><%= notification.notification_message %><br/>
+	<%end%>
+<%end%>

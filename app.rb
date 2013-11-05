@@ -6,11 +6,17 @@ require_relative './app/models/post'
 require_relative './app/models/friendship'
 require_relative './app/models/likedpost'
 require_relative './app/models/comment'
+require_relative './app/models/notification'
 
 
 ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango')
 
 enable :sessions
+
+def create_notification(member_id, message)
+ Notification.create(member_id: member_id,
+  notification_message: message)
+end
 
 get '/' do
   if session[:logged_in_user_id]
@@ -109,6 +115,7 @@ post '/add_friend' do
   Friendship.create(:member_id_one => params[:member_id_one],
    :member_id_two => params[:member_id_two],
    :accepted => false)
+  create_notification(params[:member_id_two],"You have a pending friend request from: #{(Member.find_by_id(params[:member_id_one]).first_name)} #{(Member.find_by_id(params[:member_id_one]).last_name)}.")
   member_from_last_page = Member.find_by_id(params[:member_id_two])
   redirect "/#{member_from_last_page.first_name.split.join}_#{member_from_last_page.last_name}"
 end
@@ -116,17 +123,19 @@ end
 post '/confirm_friend' do
   page_owner = Member.find(params[:page_owner_id].to_i)
   if params[:different] == "true"
-    # request_to_accept = Friendship.find_by_member_id_one(params[:request_id].to_i)
     request_to_accept = Friendship.where(member_id_one: params[:page_owner_id].to_i, member_id_two: params[:curr_user_id].to_i).take
-    puts request_to_accept.id
     request_to_accept.accepted = true
     request_to_accept.save
+    create_notification(request_to_accept.member_id_one,"You are now friends with: #{(Member.find_by_id(request_to_accept.member_id_two).first_name)} #{(Member.find_by_id(request_to_accept.member_id_two).last_name)}!")
+    create_notification(request_to_accept.member_id_two,"You are now friends with: #{(Member.find_by_id(request_to_accept.member_id_one).first_name)} #{(Member.find_by_id(request_to_accept.member_id_one).last_name)}!")
   else
     request_to_accept = Friendship.find(params[:request_id].to_i)
     request_to_accept.accepted = true
     request_to_accept.save
+    create_notification(request_to_accept.member_id_one,"You are now friends with: #{(Member.find_by_id(request_to_accept.member_id_two).first_name)} #{(Member.find_by_id(request_to_accept.member_id_two).last_name)}!")
+    create_notification(request_to_accept.member_id_two,"You are now friends with: #{(Member.find_by_id(request_to_accept.member_id_one).first_name)} #{(Member.find_by_id(request_to_accept.member_id_one).last_name)}!")
   end
-  
+
   redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
 end
 
@@ -136,6 +145,7 @@ post '/likepost' do
   Likedpost.create member_id: member.id,
                    post_id: post.id
   page_owner = Member.find_by_id(params[:page_owner].to_i)
+  create_notification(post.member.id, "#{member.first_name} #{member.last_name} has liked your post: #{post.contents}")
   redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
 end
 
@@ -153,6 +163,7 @@ post '/likeposthome' do
   Likedpost.create member_id: member.id,
                    post_id: post.id
   page_owner = Member.find_by_id(params[:page_owner].to_i)
+  create_notification(post.member.id, "#{member.first_name} #{member.last_name} has liked your post: #{post.contents}")
   redirect "/"
 end
 
@@ -170,6 +181,11 @@ get '/:member' do
     end
   end
   erb :member
+end
+
+get '/:member/notifications' do
+  puts params
+  erb :show_notifications
 end
 
 post '/:member' do
