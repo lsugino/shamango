@@ -9,16 +9,16 @@ require_relative './app/models/comment'
 require_relative './app/models/notification'
 
 
-ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango') #NEED THIS TO RUN LOCALLY
+# ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shamango') #NEED THIS TO RUN LOCALLY
 
-# ActiveRecord::Base.establish_connection(adapter: 'postgresql',
-# encoding: 'unicode',
-# pool: '30',
-# database: 'dbmktd3jd7g9ct',
-# username: 'xmrcbarnieqgkz',
-# password: 'Qov7pP6FhCyRJSizZYa53f-XK0',
-# host: 'ec2-107-20-228-206.compute-1.amazonaws.com',
-# port: '5432')
+ActiveRecord::Base.establish_connection(adapter: 'postgresql',
+encoding: 'unicode',
+pool: '30',
+database: 'dbmktd3jd7g9ct',
+username: 'xmrcbarnieqgkz',
+password: 'Qov7pP6FhCyRJSizZYa53f-XK0',
+host: 'ec2-107-20-228-206.compute-1.amazonaws.com',
+port: '5432')
 
 enable :sessions
 
