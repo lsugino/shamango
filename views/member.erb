@@ -106,7 +106,7 @@ This person has sent you a friend request already!
       <% end %> 
       <% ch.sort! {|x,y| x.created_at <=> y.created_at} %>
       <% ch.each do |comment|%>
-        <br/><%=comment.contents%><br/>
+        <br/><a href="/<%="#{comment.member.first_name}_#{comment.member.last_name}"%>"><%="#{comment.member.first_name} #{comment.member.last_name}"%></a><%=": #{comment.contents}"%><br/>
       <%end%>
         <form name="input" action="/add_comment" method="post">
         <textarea type = "text" name = "contents" placeholder = "Write a comment!"></textarea>  

@@ -17,6 +17,7 @@ ActiveRecord::Schema.define(version: 20131104183922) do
 
   create_table "comments", force: true do |t|
     t.integer  "post_id"
+    t.integer  "member_id"
     t.text     "contents"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -49,6 +50,7 @@ ActiveRecord::Schema.define(version: 20131104183922) do
   create_table "notifications", force: true do |t|
     t.integer  "member_id"
     t.text     "notification_message"
+    t.boolean  "seen",                 default: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end

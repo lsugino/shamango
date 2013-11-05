@@ -4,6 +4,7 @@ class Member < ActiveRecord::Base
   has_many :posts
   has_many :likedposts
   has_many :notifications
+  has_many :comments
   def name
   	"#{self.first_name.split.join}#{self.last_name.split.join}"
   end

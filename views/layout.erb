@@ -10,7 +10,7 @@
         <a href="/<%="#{member.first_name.split.join}_#{member.last_name}"%>"><%="#{member.first_name}"%></a>
         <a href ="/logout">Logout</a>
         <a href ="/delete_account">Delete your account</a>
-        <a href="/<%="#{member.first_name.split.join}_#{member.last_name}"%>/notifications">Notifications</a>
+        <a href="/<%="#{member.first_name.split.join}_#{member.last_name}"%>/notifications">You have <%=current_members_unseen_notifications.length%> new notifications</a>
         <%if !@dont_show_search%>
           <form action="/search" method= "post">
           Search by full name: <input type="text" name="name"> 

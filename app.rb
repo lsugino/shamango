@@ -13,10 +13,21 @@ ActiveRecord::Base.establish_connection(adapter: 'postgresql', database: 'shaman
 
 enable :sessions
 
-def create_notification(member_id, message)
- Notification.create(member_id: member_id,
-  notification_message: message)
+helpers do
+  def current_member
+    Member.find_by_id(session[:logged_in_user_id])
+  end
+
+  def create_notification(member_id, message)
+    Notification.create member_id: member_id,
+                        notification_message: message
+  end
+
+  def current_members_unseen_notifications
+    Notification.where(member_id: current_member.id, seen: false)
+  end
 end
+
 
 get '/' do
   if session[:logged_in_user_id]
@@ -73,13 +84,22 @@ post '/delete_account' do
 end
 
 post '/add_comment/home' do
-  Comment.create params
+  post = Post.find_by_id(params[:post_id])
+  member = post.member
+  Comment.create post_id: params[:post_id],
+                 contents: params[:contents],
+                 member_id: current_member.id
+  create_notification(member.id, "#{current_member.first_name} #{current_member.last_name} has commented on your post: #{post.contents} -->  #{params[:contents]}")
   redirect '/'
 end
 
 post '/add_comment' do
+  post = Post.find_by_id(params[:post_id])
+  member = post.member
   Comment.create post_id: params[:post_id],
-                 contents: params[:contents]
+                 contents: params[:contents],
+                 member_id: current_member.id
+  create_notification(member.id, "#{current_member.first_name} #{current_member.last_name} has commented on your post: #{post.contents} -->  #{params[:contents]}")                 
   page_owner = Member.find_by_id(params[:page_owner].to_i)
   redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
 end
@@ -139,6 +159,16 @@ post '/confirm_friend' do
   redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
 end
 
+post '/comment_seen' do
+  puts params
+  notification = Notification.find_by_id(params[:notification_id])
+  puts notification
+  puts notification.id
+  notification.seen = true
+  notification.save
+  redirect "/#{current_member.first_name}_#{current_member.last_name}/notifications"
+end
+
 post '/likepost' do
   post = Post.find_by_id(params[:post_id].to_i)
   member = Member.find_by_id(params[:member_id].to_i)
@@ -184,7 +214,7 @@ get '/:member' do
 end
 
 get '/:member/notifications' do
-  puts params
+  @notifications = Notification.where(member_id: current_member.id)
   erb :show_notifications
 end
 
@@ -193,6 +223,7 @@ post '/:member' do
   Post.create contents: params[:contents],
               member_id: session[:logged_in_user_id],
               post_reciever: params[:reciever_id]
+  create_notification(params[:reciever_id], "#{member.first_name} #{member.last_name} has posted on your wall: #{params[:contents]}")
   page_owner = Member.find_by_id(params[:page_owner].to_i)
   redirect "/#{page_owner.first_name.split.join}_#{page_owner.last_name}"
 end
@@ -202,6 +233,6 @@ post '/:member/home' do
   Post.create contents: params[:contents],
               member_id: session[:logged_in_user_id],
               post_reciever: params[:reciever_id]
-  page_owner = Member.find_by_id(params[:page_owner].to_i)
+  create_notification(params[:reciever_id], "#{member.first_name} #{member.last_name} has posted on your wall: #{params[:contents]}")
   redirect "/"
 end
